@@ -1,0 +1,18 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Generated outputs and local exports
+outputs/*
+!outputs/.gitkeep
+
+# Streamlit and editor artifacts
+.streamlit/secrets.toml
+.vscode/

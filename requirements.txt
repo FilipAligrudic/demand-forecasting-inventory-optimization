@@ -1,0 +1,13 @@
+streamlit>=1.36
+pandas>=2.2
+numpy>=2.1
+scipy>=1.13
+scikit-learn>=1.5
+statsmodels>=0.14
+lightgbm>=4.5
+shap>=0.46
+plotly>=5.22
+matplotlib>=3.9
+openpyxl>=3.1
+# prophet je opcioni — ako instalacija padne na Python 3.13, aplikacija i dalje radi
+prophet>=1.1.6; python_version < "3.13"

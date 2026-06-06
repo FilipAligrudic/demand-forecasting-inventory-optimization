@@ -1,0 +1,15 @@
+[theme]
+base = "light"
+primaryColor = "#2563eb"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f7fb"
+textColor = "#1f2d3d"
+font = "sans serif"
+
+[server]
+# Brži upload velikih CSV-ova i bez nepotrebnog re-runa na svaki keystroke
+maxUploadSize = 400
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
