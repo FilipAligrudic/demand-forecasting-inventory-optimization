@@ -67,6 +67,39 @@ def total_inventory_cost(
 
 
 # ---------------------------------------------------------------------------
+# Stockout ekonomija (newsvendor model)
+# ---------------------------------------------------------------------------
+
+def optimal_service_level(stockout_cost: float, holding_cost_annual: float, cover_days: float) -> float:
+    """Ekonomski optimalan service level (newsvendor kritični odnos).
+
+    SL* = Cu / (Cu + Co)
+      Cu = trošak manjka po jedinici (stockout cost)
+      Co = trošak viška po jedinici za period pokrivanja (holding × dani/365)
+
+    Govori na kojem service level-u se izjednačava cijena prevelike i premale narudžbe.
+    """
+    co = holding_cost_annual * max(0.0, cover_days) / 365.0
+    cu = max(0.0, stockout_cost)
+    if cu + co <= 0:
+        return 0.95
+    return float(np.clip(cu / (cu + co), 0.5, 0.999))
+
+
+def expected_shortage_per_cycle(std_daily_demand: float, lead_time_days: float, service_level: float) -> float:
+    """Očekivani broj jedinica manjka po ciklusu nabavke.
+
+    Standardna funkcija gubitka normalne raspodjele:
+      E[manjak] = σ_L · L(z),   L(z) = φ(z) − z·(1 − Φ(z))
+    gdje je σ_L = σ_d · √L  (st. devijacija potražnje tokom lead time-a).
+    """
+    sigma_L = std_daily_demand * sqrt(max(0.0, lead_time_days))
+    z = service_level_z(service_level)
+    loss = float(norm.pdf(z) - z * (1.0 - norm.cdf(z)))
+    return float(max(0.0, sigma_L * loss))
+
+
+# ---------------------------------------------------------------------------
 # High-level API
 # ---------------------------------------------------------------------------
 
@@ -92,6 +125,8 @@ class InventoryRecommendation:
     mean_daily_demand: float
     std_daily_demand: float
     annual_demand: float
+    suggested_service_level: float = 0.0   # newsvendor optimum iz stockout/holding odnosa
+    expected_stockout_cost: float = 0.0    # očekivani trošak manjka po ciklusu (€)
 
     def to_dict(self) -> dict:
         return self.__dict__
@@ -132,6 +167,11 @@ def recommend_order(
     recommended = max(eoq, coverage_qty - current_stock)
     recommended = max(0.0, recommended)
 
+    # Stockout ekonomija — koristi stockout_cost
+    suggested_sl = optimal_service_level(params.stockout_cost, params.holding_cost, cover_days)
+    exp_short = expected_shortage_per_cycle(std_daily, params.lead_time_days, params.service_level)
+    expected_stockout_cost = params.stockout_cost * exp_short
+
     expected_cost = total_inventory_cost(
         order_qty=recommended if recommended > 0 else eoq,
         annual_demand=annual_demand,
@@ -151,6 +191,8 @@ def recommend_order(
         mean_daily_demand=round(mean_daily, 2),
         std_daily_demand=round(std_daily, 2),
         annual_demand=round(annual_demand, 2),
+        suggested_service_level=round(suggested_sl, 3),
+        expected_stockout_cost=round(expected_stockout_cost, 2),
     )
 
 

@@ -104,20 +104,23 @@ demand-forecasting-inventory-optimization/
 ├── data/
 │   └── sample_sales.csv            # generiše se automatski
 ├── src/
-│   ├── data_processing.py          # učitavanje + čišćenje
-│   ├── feature_engineering.py      # lag, rolling, kalendar
-│   ├── forecasting.py              # baseline + LightGBM + Prophet
-│   ├── inventory_optimization.py   # EOQ, safety stock, ROP
+│   ├── data_processing.py          # učitavanje + auto-prepoznavanje kolona + čišćenje
+│   ├── feature_engineering.py      # lag, rolling, kalendar (29 feature-a)
+│   ├── forecasting.py              # baseline, seasonal-naive, LightGBM, Holt-Winters, ensemble, Prophet
+│   ├── inventory_optimization.py   # EOQ, safety stock, ROP, newsvendor (stockout)
 │   ├── anomaly_detection.py        # Isolation Forest + z-score
 │   ├── explainability.py           # SHAP global + lokalno
 │   ├── order_generator.py          # narudžbenica + CSV/Excel export
-│   └── generate_sample_data.py
+│   └── generate_sample_data.py     # sintetički demo dataset
 ├── notebooks/
 │   ├── 01_exploration.ipynb
 │   └── 02_model_training.ipynb
 ├── outputs/                        # snimljene narudžbenice
 └── presentation/
-    └── presentation_outline.md
+    ├── presentation_outline.md             # kratki sadržaj slajdova
+    ├── odbrana_prezentacija.md             # detaljan paket za odbranu (govor, Q&A, demo plan)
+    ├── Odbrana_Demand_Forecasting.pptx     # gotova prezentacija (PowerPoint)
+    └── build_pptx.js                       # skripta koja generiše .pptx
 ```
 
 ## Objašnjenje modela
@@ -231,6 +234,23 @@ Aplikacija kombinuje EOQ sa pokrivanjem `review_period + lead_time`:
 ```
 recommended = max(EOQ, mean_daily_demand × (review_period + lead_time) + safety_stock - current_stock)
 ```
+
+### Stockout cost — newsvendor model
+
+`stockout_cost` (trošak izgubljene prodaje po jedinici) ulazi u dvije veličine:
+
+- **Ekonomski optimalan service level** (newsvendor kritični odnos):
+
+$$SL^* = \frac{C_u}{C_u + C_o}, \quad C_u = \text{stockout cost}, \quad C_o = \text{holding} \times \frac{\text{cover days}}{365}$$
+
+  Dashboard prikazuje ovaj optimum i poredi ga sa trenutno izabranim service level-om —
+  tako korisnik vidi da li mu je trenutni izbor ekonomski opravdan.
+
+- **Očekivani trošak manjka po ciklusu** preko standardne funkcije gubitka normalne raspodjele:
+
+$$E[\text{manjak}] = \sigma_L \cdot L(z), \quad L(z) = \varphi(z) - z\,(1 - \Phi(z))$$
+
+  gdje je $\sigma_L = \sigma_d \sqrt{L}$. Veći service level → manji očekivani manjak → manji stockout trošak.
 
 ## Dashboard — opis
 

@@ -563,7 +563,17 @@ elif view == "inventory":
             - **Reorder point:** {rec.reorder_point:,.1f} jed
             - **Preporučena količina narudžbe:** **{rec.recommended_order_qty:,.0f}** jed
             - Očekivani godišnji trošak: **{rec.expected_annual_cost:,.0f} €**
+            - Očekivani trošak manjka (po ciklusu): **{rec.expected_stockout_cost:,.2f} €**
             """
+        )
+        # Newsvendor: ekonomski optimalan service level iz odnosa stockout/holding
+        delta = rec.suggested_service_level - service_level
+        smjer = "viši" if delta > 0.005 else ("niži" if delta < -0.005 else "blizu trenutnog")
+        st.info(
+            f"💡 **Ekonomski optimalan service level:** {rec.suggested_service_level:.0%} "
+            f"(trenutno: {service_level:.0%} — {smjer}).  \n"
+            f"Računa se iz odnosa *stockout cost* ({stockout_cost:.0f} €) i *holding cost* "
+            f"po newsvendor modelu: SL\\* = Cu / (Cu + Co)."
         )
     with cB:
         st.markdown("**Osjetljivost na service level**")
