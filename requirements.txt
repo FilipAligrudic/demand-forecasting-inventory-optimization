@@ -9,5 +9,7 @@ shap>=0.46
 plotly>=5.22
 matplotlib>=3.9
 openpyxl>=3.1
-# prophet je opcioni — ako instalacija padne na Python 3.13, aplikacija i dalje radi
-prophet>=1.1.6; python_version < "3.13"
+# Prophet je OPCIONI i namjerno izostavljen iz deploy zavisnosti:
+# na Streamlit Cloud-u zna da padne (treba kompajliranje), a aplikacija radi i bez njega
+# (klasičnu sezonalnost pokriva Holt-Winters u ensemble modelu).
+# Za lokalni Prophet (Python < 3.13):  pip install "prophet>=1.1.6"
