@@ -13,6 +13,10 @@ __pycache__/
 outputs/*
 !outputs/.gitkeep
 
+# Local trained model binaries can be large; regenerate them with train_model.py
+models/*.joblib
+models/*.pkl
+
 # Streamlit and editor artifacts
 .streamlit/secrets.toml
 .vscode/

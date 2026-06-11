@@ -48,7 +48,7 @@ from src.order_generator import (  # noqa: E402
     to_csv_bytes,
     to_excel_bytes,
 )
-from src.generate_sample_data import ensure_sample_data  # noqa: E402
+
 
 
 # ============================================================================
@@ -235,12 +235,14 @@ st.sidebar.markdown("---")
 st.sidebar.header("Podaci")
 uploaded = st.sidebar.file_uploader("Učitaj CSV sa prodajom", type=["csv"])
 
-DATA_PATH = ROOT / "data" / "sample_sales.csv"
+DATA_PATH = ROOT / "data" / "rossmann_demo_30.csv"
 
 
 @st.cache_data(show_spinner=False)
 def load_default() -> pd.DataFrame:
-    ensure_sample_data(DATA_PATH)
+    if not DATA_PATH.exists():
+        st.error("Nije pronađen data/rossmann_train.csv. Ubaci Rossmann train.csv u data folder.")
+        st.stop()
     return load_sales_csv(DATA_PATH)
 
 

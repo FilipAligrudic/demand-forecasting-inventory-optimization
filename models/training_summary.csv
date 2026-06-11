@@ -1,0 +1,31 @@
+Store,Product,status,rows,features,horizon_days,best_model,best_mape,lgbm_val_mape,recommended_order_qty,model_path,forecast_path,metrics_path
+1033,ALL,trained,942,28,28,Holt-Winters,14.708634771488803,10.020703898874112,171899.6,models\model_1033__ALL.joblib,models\forecast_1033__ALL.csv,models\metrics_1033__ALL.csv
+1114,ALL,trained,942,28,28,Baseline (moving avg),10.067768404720102,13.434833496346291,290410.36,models\model_1114__ALL.joblib,models\forecast_1114__ALL.csv,models\metrics_1114__ALL.csv
+211,ALL,trained,942,28,28,Ensemble (hibrid),15.103437451006139,11.613234099294498,178525.9,models\model_211__ALL.joblib,models\forecast_211__ALL.csv,models\metrics_211__ALL.csv
+251,ALL,trained,942,28,28,Ensemble (hibrid),12.017302074779357,6.872665188900025,239622.49,models\model_251__ALL.joblib,models\forecast_251__ALL.csv,models\metrics_251__ALL.csv
+259,ALL,trained,942,28,28,LightGBM,4.064011006180177,7.106460949530367,186371.49,models\model_259__ALL.joblib,models\forecast_259__ALL.csv,models\metrics_259__ALL.csv
+262,ALL,trained,942,28,28,Ensemble (hibrid),7.919517891604203,6.847605769611892,355359.69,models\model_262__ALL.joblib,models\forecast_262__ALL.csv,models\metrics_262__ALL.csv
+320,ALL,trained,942,28,28,Ensemble (hibrid),14.718994167522768,11.702099523702305,193896.99,models\model_320__ALL.joblib,models\forecast_320__ALL.csv,models\metrics_320__ALL.csv
+335,ALL,trained,942,28,28,Ensemble (hibrid),15.803909704984795,8.03991536255956,204762.31,models\model_335__ALL.joblib,models\forecast_335__ALL.csv,models\metrics_335__ALL.csv
+336,ALL,trained,942,28,28,Ensemble (hibrid),13.852919099794244,6.662132414458983,169837.92,models\model_336__ALL.joblib,models\forecast_336__ALL.csv,models\metrics_336__ALL.csv
+380,ALL,trained,942,28,28,Ensemble (hibrid),14.95665570118254,7.189113871496295,174944.25,models\model_380__ALL.joblib,models\forecast_380__ALL.csv,models\metrics_380__ALL.csv
+383,ALL,trained,942,28,28,Baseline (moving avg),9.056358353607246,6.776441837844124,214443.39,models\model_383__ALL.joblib,models\forecast_383__ALL.csv,models\metrics_383__ALL.csv
+423,ALL,trained,942,28,28,Ensemble (hibrid),7.06756058909651,9.92980719079766,166071.82,models\model_423__ALL.joblib,models\forecast_423__ALL.csv,models\metrics_423__ALL.csv
+467,ALL,trained,942,28,28,Ensemble (hibrid),11.834134644285726,7.33929461614381,173128.34,models\model_467__ALL.joblib,models\forecast_467__ALL.csv,models\metrics_467__ALL.csv
+470,ALL,trained,942,28,28,Ensemble (hibrid),15.703361566434435,6.74741148541167,149971.48,models\model_470__ALL.joblib,models\forecast_470__ALL.csv,models\metrics_470__ALL.csv
+513,ALL,trained,942,28,28,Ensemble (hibrid),12.022071697761872,8.11287550992421,217290.31,models\model_513__ALL.joblib,models\forecast_513__ALL.csv,models\metrics_513__ALL.csv
+523,ALL,trained,942,28,28,LightGBM,8.743042875042674,9.330185924607697,173865.18,models\model_523__ALL.joblib,models\forecast_523__ALL.csv,models\metrics_523__ALL.csv
+544,ALL,trained,942,28,28,Ensemble (hibrid),15.8914458074746,7.394038453919882,183789.72,models\model_544__ALL.joblib,models\forecast_544__ALL.csv,models\metrics_544__ALL.csv
+546,ALL,trained,942,28,28,Holt-Winters,7.757057911770247,12.337351076443804,181614.38,models\model_546__ALL.joblib,models\forecast_546__ALL.csv,models\metrics_546__ALL.csv
+562,ALL,trained,942,28,28,Ensemble (hibrid),7.286957546798655,5.219602234711949,249455.6,models\model_562__ALL.joblib,models\forecast_562__ALL.csv,models\metrics_562__ALL.csv
+586,ALL,trained,942,28,28,Ensemble (hibrid),14.278184662826845,7.889527956654894,202678.94,models\model_586__ALL.joblib,models\forecast_586__ALL.csv,models\metrics_586__ALL.csv
+595,ALL,trained,942,28,28,Ensemble (hibrid),14.18690830240208,11.205238945420588,182257.09,models\model_595__ALL.joblib,models\forecast_595__ALL.csv,models\metrics_595__ALL.csv
+682,ALL,trained,942,28,28,Ensemble (hibrid),11.733723869168834,7.3550740273561965,156072.44,models\model_682__ALL.joblib,models\forecast_682__ALL.csv,models\metrics_682__ALL.csv
+698,ALL,trained,942,28,28,Holt-Winters,8.888688497665221,9.53305663174311,208006.63,models\model_698__ALL.joblib,models\forecast_698__ALL.csv,models\metrics_698__ALL.csv
+733,ALL,trained,942,28,28,LightGBM,7.204784182238422,5.737417970680533,210237.5,models\model_733__ALL.joblib,models\forecast_733__ALL.csv,models\metrics_733__ALL.csv
+756,ALL,trained,942,28,28,Ensemble (hibrid),15.212173077750327,8.932655699812907,220211.94,models\model_756__ALL.joblib,models\forecast_756__ALL.csv,models\metrics_756__ALL.csv
+768,ALL,trained,942,28,28,Ensemble (hibrid),16.01961628813596,8.280921164002281,188518.08,models\model_768__ALL.joblib,models\forecast_768__ALL.csv,models\metrics_768__ALL.csv
+769,ALL,trained,942,28,28,LightGBM,7.040421435374869,7.403268291219392,168119.44,models\model_769__ALL.joblib,models\forecast_769__ALL.csv,models\metrics_769__ALL.csv
+788,ALL,trained,942,28,28,Holt-Winters,10.8969514741518,7.825326940575968,224234.0,models\model_788__ALL.joblib,models\forecast_788__ALL.csv,models\metrics_788__ALL.csv
+817,ALL,trained,942,28,28,Holt-Winters,10.114595865274001,6.337123300814768,254794.05,models\model_817__ALL.joblib,models\forecast_817__ALL.csv,models\metrics_817__ALL.csv
+842,ALL,trained,758,28,28,Sezonski naivni,12.506520470832347,10.004305716581275,270484.12,models\model_842__ALL.joblib,models\forecast_842__ALL.csv,models\metrics_842__ALL.csv
