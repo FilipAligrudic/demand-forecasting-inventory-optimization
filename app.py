@@ -241,8 +241,8 @@ DATA_PATH = ROOT / "data" / "rossmann_demo_30.csv"
 @st.cache_data(show_spinner=False)
 def load_default() -> pd.DataFrame:
     if not DATA_PATH.exists():
-      st.error("Nije pronađen data/rossmann_demo_30.csv. Ubaci Rossmann demo dataset sa 30 prodavnica u data folder.")
-        st.stop()
+                st.error("Nije pronađen data/rossmann_demo_30.csv. Ubaci Rossmann demo dataset sa 30 prodavnica u data folder.")
+                st.stop()
     return load_sales_csv(DATA_PATH)
 
 
