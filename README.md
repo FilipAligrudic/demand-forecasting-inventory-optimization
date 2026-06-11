@@ -117,8 +117,24 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Otvara se browser na `http://localhost:8501`. Prilikom prvog pokretanja kreira se
-demo CSV automatski.
+Aplikacija se otvara u browseru na:
+
+```text
+http://localhost:8501
+```
+
+Dashboard podrazumijevano učitava:
+
+```text
+data/rossmann_demo_30.csv
+```
+
+Ako fajl ne postoji, potrebno je ubaciti demo CSV u `data/` folder ili ga napraviti pomoću:
+
+```bash
+python make_rossmann_demo.py
+```
+
 
 ## GitHub i Streamlit Cloud
 
