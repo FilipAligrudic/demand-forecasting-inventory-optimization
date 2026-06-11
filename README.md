@@ -46,15 +46,50 @@ Potreban je sistem koji za svaki par (prodavnica, proizvod) odgovara na pitanje:
 
 ## Dataset
 
-Projekat koristi **Rossmann Store Sales** šemu (Kaggle):
-`Date · Store · Sales · Customers · Promo · StateHoliday · SchoolHoliday`.
+Projekat koristi **Rossmann Store Sales** šemu:
 
-Ako korisnik nema originalni CSV, prilikom prvog pokretanja generiše se
-**sintetički dataset** (`data/sample_sales.csv`) sa realističnim trendom, sezonom,
-promocijama i praznicima. Rezultati nad sample podacima su **demonstracioni**.
+```text
+Date · Store · Sales · Customers · Promo · StateHoliday · SchoolHoliday
+```
 
-> **Napomena:** Originalni Rossmann CSV se može preuzeti sa [Kaggle](https://www.kaggle.com/c/rossmann-store-sales).
-> Za originalne podatke postavi `Date`, `Store`, `Sales`, `Promo`, `StateHoliday`, `SchoolHoliday` kolone — projekat radi i bez `Product` kolone (tretira sve kao jedan SKU).
+Za finalni demo koristi se:
+
+```text
+data/rossmann_demo_30.csv
+```
+
+To je podskup od **30 Rossmann prodavnica**, napravljen iz punog Rossmann dataseta kako bi se aplikacija brzo pokretala tokom prezentacije. Puni Rossmann dataset ima **1115 prodavnica** i može se koristiti za offline trening, ali nije praktičan za live demo jer učitavanje i trening traju znatno duže.
+
+Rossmann dataset nema `Product` / `SKU` kolonu. Zbog toga aplikacija automatski tretira svaku prodavnicu kao jednu vremensku seriju sa:
+
+```text
+Product = ALL
+```
+
+Arhitektura projekta ipak podržava `Product` kolonu, tako da se isti sistem može koristiti i za dataset sa pojedinačnim proizvodima/SKU-ovima.
+
+### Priprema Rossmann demo dataseta
+
+Ako postoji puni dataset:
+
+```text
+data/rossmann_train.csv
+```
+
+može se napraviti demo dataset od 30 prodavnica komandom:
+
+```bash
+python make_rossmann_demo.py
+```
+
+Rezultat je:
+
+```text
+data/rossmann_demo_30.csv
+```
+
+> Napomena: puni Rossmann dataset može se preuzeti sa Kaggle takmičenja Rossmann Store Sales. Zbog pravila distribucije dataset može ostati lokalno, dok se za demo koristi manji pripremljeni fajl.
+
 
 ## Instalacija
 
