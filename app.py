@@ -241,7 +241,7 @@ DATA_PATH = ROOT / "data" / "rossmann_demo_30.csv"
 @st.cache_data(show_spinner=False)
 def load_default() -> pd.DataFrame:
     if not DATA_PATH.exists():
-        st.error("Nije pronađen data/rossmann_train.csv. Ubaci Rossmann train.csv u data folder.")
+      st.error("Nije pronađen data/rossmann_demo_30.csv. Ubaci Rossmann demo dataset sa 30 prodavnica u data folder.")
         st.stop()
     return load_sales_csv(DATA_PATH)
 
@@ -269,7 +269,7 @@ if uploaded is not None:
         df = load_default()
 else:
     df = load_default()
-    st.sidebar.info("Demo dataset (data/sample_sales.csv)")
+    st.sidebar.info("Rossmann demo dataset (data/rossmann_demo_30.csv)")
     st.sidebar.caption("Rezultati su demonstracioni — postavi vlastiti CSV za realne vrijednosti.")
 
 summary = basic_summary(df)
