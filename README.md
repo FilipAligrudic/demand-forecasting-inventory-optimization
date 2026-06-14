@@ -149,24 +149,28 @@ python make_rossmann_demo.py
 ```
 demand-forecasting-inventory-optimization/
 ├── app.py                          # Streamlit dashboard (navigacija po prikazima)
-├── .streamlit/config.toml          # tema (boje, font, upload limit)
-├── requirements.txt
+├── train_model.py                  # offline trening modela + metrika
+├── make_rossmann_demo.py           # pravi data/rossmann_demo_30.csv iz punog Rossmann dataseta
+├── requirements.txt                # osnovne zavisnosti za pokretanje/deploy
 ├── README.md
+├── TRAINING.md                     # detaljno uputstvo za offline trening
+├── .streamlit/config.toml          # tema (boje, font, upload limit)
 ├── data/
-│   └── sample_sales.csv            # generiše se automatski
+│   ├── rossmann_demo_30.csv         # demo dataset za aplikaciju (30 prodavnica)
+│   └── rossmann_train.csv           # puni Rossmann dataset, opciono/lokalno
 ├── src/
 │   ├── data_processing.py          # učitavanje + auto-prepoznavanje kolona + čišćenje
-│   ├── feature_engineering.py      # lag, rolling, kalendar (29 feature-a)
-│   ├── forecasting.py              # baseline, seasonal-naive, LightGBM, Holt-Winters, ensemble, Prophet
+│   ├── feature_engineering.py      # kalendarski, lag, rolling i opcioni eksterni feature-i
+│   ├── forecasting.py              # baseline, seasonal-naive, LightGBM, Holt-Winters, ensemble, opcioni Prophet
 │   ├── inventory_optimization.py   # EOQ, safety stock, ROP, newsvendor (stockout)
 │   ├── anomaly_detection.py        # Isolation Forest + z-score
 │   ├── explainability.py           # SHAP global + lokalno
-│   ├── order_generator.py          # narudžbenica + CSV/Excel export
-│   └── generate_sample_data.py     # sintetički demo dataset
+│   └── order_generator.py          # narudžbenica + CSV/Excel export
+├── models/                         # opcioni output offline treninga (modeli, forecast, metrike)
+├── outputs/                        # snimljene narudžbenice
 ├── notebooks/
 │   ├── 01_exploration.ipynb
 │   └── 02_model_training.ipynb
-├── outputs/                        # snimljene narudžbenice
 └── presentation/
     ├── presentation_outline.md             # kratki sadržaj slajdova
     ├── odbrana_prezentacija.md             # detaljan paket za odbranu (govor, Q&A, demo plan)
@@ -241,13 +245,13 @@ Feature-i:
 Facebook Prophet — sezonski model dobar za serije sa jasnim godišnjim/sedmičnim ciklusom.
 Aktivira se opciono u dashboardu zbog sporog treniranja. **Napomena:** na Python 3.13 Prophet
 nije instaliran (nema zvaničnog wheel-a), pa ga aplikacija preskače i jasno to prikaže;
-u tom slučaju ulogu sezonskog modela preuzima *sezonski naivni* benchmark.
+u tom slučaju sezonsku komponentu pokriva **Holt-Winters**, a *sezonski naivni* ostaje benchmark.
 
 ### Confidence intervali
 
 Dva pristupa kombinovana:
 - **Quantile LightGBM** — dva dodatna modela trenirana sa `objective="quantile"` i α=0.1 / α=0.9.
-- Prophet vraća sopstveni 80% interval iz Bayesian inference.
+- Prophet, ako je instaliran i ručno aktiviran, vraća sopstveni 80% interval iz Bayesian inference.
 
 ## EOQ i safety stock logika
 
@@ -324,7 +328,7 @@ model jednom istrenira i keširaju rezultati).
 Tema i izgled su definisani u `.streamlit/config.toml` + CSS u `app.py` (hero header, KPI kartice).
 
 Sidebar omogućava:
-- Upload vlastitog CSV-a (fallback je sample dataset).
+- Upload vlastitog CSV-a; ako nema upload-a, koristi se `data/rossmann_demo_30.csv`.
 - Izbor prodavnice i proizvoda.
 - **Izbor glavnog modela** (Ensemble / LightGBM / Holt-Winters / Sezonski naivni).
 - **Granularnost prikaza:** dnevno ili sedmično (zadatak traži oboje).
@@ -334,32 +338,34 @@ Sidebar omogućava:
 ## Primjer korišćenja
 
 1. Otvori dashboard (`streamlit run app.py`).
-2. Iz sidebar-a izaberi `Store_1` i `SKU_2`.
-3. Pomjeri service level na 0.98 — safety stock raste, vidiš novu preporuku.
-4. Uključi **What-if: Promocija** — forecast skoči ~35%, preporučena količina takođe.
-5. Idi na **Objašnjenja (SHAP)** — vidiš da je lag_7 (prodaja prije sedmicu dana) najjači prediktor.
-6. Idi na **Narudžbenica → Generiši** — dobiješ tabelu za sve parove, klikneš **Preuzmi Excel**.
+2. Iz sidebar-a izaberi jednu Rossmann prodavnicu i proizvod `ALL`.
+3. Otvori **Forecast** — aplikacija trenira LightGBM za izabranu seriju i prikazuje prognozu sa intervalom pouzdanosti.
+4. Pomjeri service level na 0.98 — safety stock raste, vidiš novu preporuku narudžbe.
+5. Uključi **What-if: Promocija** — forecast se povećava, a preporučena količina se prilagođava.
+6. Idi na **Objašnjenja (SHAP)** — vidiš koji feature-i najviše utiču na predikciju.
+7. Idi na **Narudžbenica → Generiši** — dobiješ tabelu za sve Store/Product parove i možeš preuzeti Excel/CSV.
 
 ## Rezultati
 
-Na sintetičkom dataset-u (4 prodavnice × 5 proizvoda × ~3 godine):
+Rezultati se računaju direktno u dashboardu za trenutno izabranu seriju, jer tačnost zavisi od prodavnice, horizonta i izabranog modela.
 
-**Pošten višednevni backtest** (28 dana unaprijed), prosjek preko svih 20 serija sintetičkog dataset-a:
+Aplikacija prikazuje dvije vrste evaluacije:
 
-| Model | MAE | RMSE | MAPE |
-|-------|-----|------|------|
-| Baseline (moving avg) | 17.7 | 23.1 | 34.1% |
-| Sezonski naivni | 16.4 | 22.7 | 28.1% |
-| Holt-Winters | 12.1 | 17.0 | 21.8% |
-| LightGBM | 12.3 | 17.4 | 20.2% |
-| **Ensemble (hibrid)** | **11.6** | **16.9** | **19.8%** |
+| Tip evaluacije | Šta mjeri | Kako se tumači |
+|---|---|---|
+| **LightGBM validacija (1-korak)** | Grešku na validacionom dijelu treninga, uz stvarne lag vrijednosti | Brza provjera modela, ali optimistična za višednevni forecast |
+| **Brzi backtest (zadnjih 28 dana)** | Model trenira na prošlosti i predviđa narednih 28 dana koje nije vidio | Realnija procjena višednevne prognoze |
+| **Rolling-origin CV** | Više uzastopnih vremenskih prozora | Najpoštenija i najrobusnija procjena tačnosti |
 
-> **Ensemble (LightGBM + Holt-Winters) je najtačniji** na sve tri metrike — to je poenta hibridnog modela.
-> Brojevi variraju po seriji; **Evaluacija → Pokreni evaluaciju** daje tačne vrijednosti (i rolling-origin CV).
->
-> **Važna napomena o MAPE:** validaciona MAPE (1 korak, sa stvarnim lag-ovima) je oko **7%**, ali to je
-> optimistično. Realnu tačnost daje **višednevni backtest** iznad (~20%), jer se tu prognoze hrane same
-> sobom kroz 28 dana. KPI kartica prikazuje 1-korak vrijednost (jasno označenu), a tab Evaluacija realnu.
+Metrike koje se koriste:
+
+- **MAE** — prosječna apsolutna greška u originalnim `Sales` jedinicama.
+- **RMSE** — greška koja jače kažnjava velike promašaje.
+- **MAPE** — prosječna procentualna greška; najlakša za tumačenje u prezentaciji.
+
+> Važno: kod Rossmann podataka `Sales` vrijednosti mogu biti u hiljadama, pa MAE i RMSE mogu izgledati veliki. Zato se za brzo poređenje modela najčešće tumači **MAPE**, dok backtest i rolling-origin CV daju realniju procjenu od 1-korak validacije.
+
+U trenutnoj aplikaciji tab **Evaluacija modela** poredi Baseline, Sezonski naivni, Holt-Winters, LightGBM i Ensemble po MAE/RMSE/MAPE i automatski označava najbolji model po MAPE.
 
 ## Već urađeno (iznad osnovne postavke)
 
