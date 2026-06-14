@@ -209,6 +209,7 @@ LGB_DEFAULT_PARAMS = dict(
     feature_fraction=0.9,
     bagging_fraction=0.9,
     bagging_freq=5,
+    random_state=42,
     verbose=-1,
 )
 
@@ -337,7 +338,9 @@ def recursive_forecast_lgbm(
 def prophet_forecast(history: pd.DataFrame, horizon: int) -> Optional[pd.DataFrame]:
     """Prophet sa default-nim sezonskim parametrima. Vraća None ako Prophet nije dostupan."""
     try:
-        from prophet import Prophet  # lazy import — sporo se učitava
+        from importlib import import_module
+
+        Prophet = import_module("prophet").Prophet  # lazy import — sporo se učitava
     except Exception:  # pragma: no cover
         return None
 

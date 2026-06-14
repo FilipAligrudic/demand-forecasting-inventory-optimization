@@ -1052,12 +1052,20 @@ elif view == "eval":
     else:
         st.info("Klikni **Pokreni evaluaciju** za poređenje svih modela.")
 
-    st.markdown("**Validaciona metrika LightGBM-a (1-korak, trenutna serija):**")
-    st.json({k: round(v, 3) for k, v in val_metrics.items()})
-    st.caption(
-        "Napomena: 1-korak validacija je optimistična (koristi stvarne lag-ove). "
-        "Backtest/CV iznad pokazuju realnu višednevnu tačnost."
-    )
+    st.markdown("**LightGBM validacija (1-korak, trenutna serija):**")
+
+vm1, vm2, vm3 = st.columns(3)
+vm1.metric("MAPE", f"{val_metrics['MAPE']:.1f}%")
+vm2.metric("MAE", f"{val_metrics['MAE']:,.0f} Sales")
+vm3.metric("RMSE", f"{val_metrics['RMSE']:,.0f} Sales")
+
+st.caption(
+    "MAE i RMSE su apsolutne greške u originalnim Sales jedinicama, "
+    "zato kod Rossmann podataka mogu izgledati veliko. "
+    "Za poređenje modela najlakše se tumači MAPE, jer je izražen u procentima. "
+    "Ova 1-korak validacija je optimistična jer koristi stvarne lag vrijednosti; "
+    "realniju višednevnu tačnost daju backtest i rolling-origin CV iznad."
+)
 
 
 # ============================================================================
