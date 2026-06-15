@@ -1022,6 +1022,7 @@ elif view == "eval":
                 )
             else:
                 eval_df = evaluate_on_backtest(feat_df, features, horizon=28)
+
         if eval_df.empty:
             st.warning("Premalo podataka za evaluaciju ove serije.")
         else:
@@ -1029,43 +1030,129 @@ elif view == "eval":
             st.session_state[f"eval_mode_{series_key}"] = eval_mode
 
     eval_key = f"eval_df_{series_key}"
+
     if eval_key in st.session_state:
         eval_df = st.session_state[eval_key]
         used_mode = st.session_state.get(f"eval_mode_{series_key}", eval_mode)
+
         best = eval_df.loc[eval_df["MAPE"].idxmin(), "Model"]
         st.success(f"**{used_mode}** — najbolji model po MAPE: **{best}**")
-        pdf(
-            eval_df.style.format(
-                {"MAE": "{:.2f}", "RMSE": "{:.2f}", "MAPE": "{:.1f}"}
-            ).highlight_min(subset=["MAE", "RMSE", "MAPE"], color="#dcfce7"),
-        )
 
-        fig_eval = go.Figure()
-        for metric in ("MAE", "RMSE", "MAPE"):
-            fig_eval.add_trace(
-                go.Bar(name=metric, x=eval_df["Model"], y=eval_df[metric])
+        metric_format = {
+            "MAE": "{:,.0f}",
+            "RMSE": "{:,.0f}",
+            "MAPE": "{:.1f}%",
+            "nMAE": "{:.1f}%",
+            "nRMSE": "{:.1f}%",
+            "MASE": "{:.2f}",
+            "RMSSE": "{:.2f}",
+        }
+
+        format_cols = {
+            col: fmt for col, fmt in metric_format.items() if col in eval_df.columns
+        }
+
+        highlight_cols = [
+            c
+            for c in ["MAPE", "nMAE", "nRMSE", "MASE", "RMSSE"]
+            if c in eval_df.columns
+        ]
+
+        styled_eval = eval_df.style.format(format_cols)
+
+        if highlight_cols:
+            styled_eval = styled_eval.highlight_min(
+                subset=highlight_cols,
+                color="#dcfce7",
             )
-        fig_eval.update_layout(
-            barmode="group", height=380, margin=dict(l=10, r=10, t=30, b=10)
-        )
-        pchart(fig_eval)
+
+        pdf(styled_eval)
+
+        percent_metrics = [
+            metric for metric in ("MAPE", "nMAE", "nRMSE") if metric in eval_df.columns
+        ]
+
+        if percent_metrics:
+            fig_eval = go.Figure()
+
+            for metric in percent_metrics:
+                fig_eval.add_trace(
+                    go.Bar(name=metric, x=eval_df["Model"], y=eval_df[metric])
+                )
+
+            fig_eval.update_layout(
+                barmode="group",
+                height=380,
+                margin=dict(l=10, r=10, t=30, b=10),
+                yaxis_title="Greška (%) — manje je bolje",
+            )
+
+            pchart(fig_eval)
+
+        scaled_metrics = [
+            metric for metric in ("MASE", "RMSSE") if metric in eval_df.columns
+        ]
+
+        if scaled_metrics:
+            fig_scaled = go.Figure()
+
+            for metric in scaled_metrics:
+                fig_scaled.add_trace(
+                    go.Bar(name=metric, x=eval_df["Model"], y=eval_df[metric])
+                )
+
+            fig_scaled.update_layout(
+                barmode="group",
+                height=330,
+                margin=dict(l=10, r=10, t=30, b=10),
+                yaxis_title="Skalirana greška — manje je bolje",
+            )
+
+            pchart(fig_scaled)
+
     else:
         st.info("Klikni **Pokreni evaluaciju** za poređenje svih modela.")
 
     st.markdown("**LightGBM validacija (1-korak, trenutna serija):**")
 
-vm1, vm2, vm3 = st.columns(3)
-vm1.metric("MAPE", f"{val_metrics['MAPE']:.1f}%")
-vm2.metric("MAE", f"{val_metrics['MAE']:,.0f} Sales")
-vm3.metric("RMSE", f"{val_metrics['RMSE']:,.0f} Sales")
+    has_normalized_metrics = all(
+        key in val_metrics for key in ["nMAE", "nRMSE", "MASE", "RMSSE"]
+    )
 
-st.caption(
-    "MAE i RMSE su apsolutne greške u originalnim Sales jedinicama, "
-    "zato kod Rossmann podataka mogu izgledati veliko. "
-    "Za poređenje modela najlakše se tumači MAPE, jer je izražen u procentima. "
-    "Ova 1-korak validacija je optimistična jer koristi stvarne lag vrijednosti; "
-    "realniju višednevnu tačnost daju backtest i rolling-origin CV iznad."
-)
+    if has_normalized_metrics:
+        vm1, vm2, vm3, vm4, vm5 = st.columns(5)
+        vm1.metric("MAPE", f"{val_metrics['MAPE']:.1f}%")
+        vm2.metric("nMAE", f"{val_metrics['nMAE']:.1f}%")
+        vm3.metric("nRMSE", f"{val_metrics['nRMSE']:.1f}%")
+        vm4.metric("MASE", f"{val_metrics['MASE']:.2f}")
+        vm5.metric("RMSSE", f"{val_metrics['RMSSE']:.2f}")
+
+        with st.expander("Apsolutne greške u originalnim Sales jedinicama", expanded=False):
+            am1, am2 = st.columns(2)
+            am1.metric("MAE", f"{val_metrics['MAE']:,.0f} Sales")
+            am2.metric("RMSE", f"{val_metrics['RMSE']:,.0f} Sales")
+
+        st.caption(
+            "MAPE, nMAE i nRMSE su procentualne/normalizovane metrike. "
+            "MASE i RMSSE porede model sa sezonski naivnim benchmarkom; vrijednost ispod 1 znači da je model bolji od tog benchmarka. "
+            "MAE i RMSE su apsolutne greške u originalnim Sales jedinicama i zato mogu izgledati veliko. "
+            "Ova 1-korak validacija je optimistična jer koristi stvarne lag vrijednosti; "
+            "realniju višednevnu tačnost daju backtest i rolling-origin CV iznad."
+        )
+
+    else:
+        vm1, vm2, vm3 = st.columns(3)
+        vm1.metric("MAPE", f"{val_metrics['MAPE']:.1f}%")
+        vm2.metric("MAE", f"{val_metrics['MAE']:,.0f} Sales")
+        vm3.metric("RMSE", f"{val_metrics['RMSE']:,.0f} Sales")
+
+        st.caption(
+            "MAE i RMSE su apsolutne greške u originalnim Sales jedinicama, "
+            "zato kod Rossmann podataka mogu izgledati veliko. "
+            "Za poređenje modela najlakše se tumači MAPE, jer je izražen u procentima. "
+            "Ova 1-korak validacija je optimistična jer koristi stvarne lag vrijednosti; "
+            "realniju višednevnu tačnost daju backtest i rolling-origin CV iznad."
+        )
 
 
 # ============================================================================
